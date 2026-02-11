@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oráculo CodeCrypto</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f5f6fa;
+            color: #1a1a2e;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 36px;
+        }
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+        .card {
+            background: #ffffff;
+            border: 1px solid #e8e8ef;
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            transition: box-shadow 0.2s;
+        }
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+        }
+        .card h2 {
+            color: #1a1a2e;
+            margin-bottom: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #e74c3c;
+            flex-shrink: 0;
+        }
+        .status-dot.connected { background: #27ae60; }
+        .info-row {
+            margin-top: 10px;
+            font-size: 0.82rem;
+            color: #999;
+            word-break: break-all;
+            line-height: 1.6;
+        }
+        .info-row span {
+            color: #555;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.78rem;
+        }
+        .meteoritos-value {
+            font-size: 4rem;
+            font-weight: 700;
+            color: #2d5be3;
+            text-align: center;
+            padding: 24px 0;
+            line-height: 1;
+        }
+        button {
+            background: #2d5be3;
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.88rem;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #1a47c9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(45,91,227,0.3);
+        }
+        button:active { transform: translateY(0); }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        input[type="date"] {
+            background: #f5f6fa;
+            border: 1px solid #dde0e9;
+            color: #1a1a2e;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            width: 200px;
+            transition: border-color 0.2s;
+        }
+        input[type="date"]:focus {
+            outline: none;
+            border-color: #2d5be3;
+            box-shadow: 0 0 0 3px rgba(45,91,227,0.1);
+        }
+        .description {
+            color: #888;
+            margin-bottom: 16px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+        .log-area {
+            background: #f9fafb;
+            border: 1px solid #e8e8ef;
+            border-radius: 10px;
+            padding: 16px;
+            max-height: 220px;
+            overflow-y: auto;
+            font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+            font-size: 0.78rem;
+            line-height: 1.7;
+        }
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .log-entry:last-child { border-bottom: none; }
+        .log-entry .time { color: #aaa; }
+        .log-entry .success { color: #27ae60; }
+        .log-entry .error { color: #e74c3c; }
+        .log-entry .pending { color: #f39c12; }
+        .log-entry .hash {
+            color: #2d5be3;
+            word-break: break-all;
+        }
+        .empty-log { color: #bbb; font-style: italic; }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        @media (max-width: 600px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            body { padding: 20px 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Oraculo CodeCrypto</h1>
+        <p class="subtitle">Smart Contract Dashboard &mdash; Ganache Local</p>
+
+        <!-- Conexión -->
+        <div class="card">
+            <h2>Conexion</h2>
+            <div class="status">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">Desconectado</span>
+            </div>
+            <div class="info-row">Owner: <span id="ownerAddress">-</span></div>
+            <div class="info-row">Contrato: <span id="contractAddress">-</span></div>
+            <div class="info-row">Balance: <span id="ownerBalance">-</span></div>
+        </div>
+
+        <!-- Meteoritos -->
+        <div class="card">
+            <h2>Meteoritos</h2>
+            <div class="meteoritos-value" id="meteoritosValue">-</div>
+            <button onclick="leerMeteoritos()">Leer valor</button>
+        </div>
+
+        <!-- Actualizar Oráculo con NASA API -->
+        <div class="card">
+            <h2>Actualizar Oraculo</h2>
+            <p class="description">Selecciona una fecha para consultar meteoritos cercanos a la Tierra (NASA NEO API). Al hacer click se emite el evento __callbackNewData, se consulta la API y se escribe el resultado en el contrato.</p>
+            <div class="btn-row">
+                <input type="date" id="nasaDate" value="2022-10-10">
+                <button onclick="actualizarOraculo()">Actualizar</button>
+            </div>
+            <div id="nasaInfo" style="margin-top: 12px; font-size: 0.85rem; color: #888;"></div>
+        </div>
+
+        <!-- Logs lado a lado -->
+        <div class="grid-2">
+            <div class="card">
+                <h2>Eventos</h2>
+                <div class="log-area" id="eventLog">
+                    <div class="empty-log">Esperando eventos...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Transacciones</h2>
+                <div class="log-area" id="txLog">
+                    <div class="empty-log">Sin transacciones aun...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
