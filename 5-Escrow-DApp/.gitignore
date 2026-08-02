@@ -1,0 +1,26 @@
+# ---- Foundry ----
+sc/cache/
+sc/out/
+sc/lib/
+sc/broadcast/
+sc/.gas-snapshot
+
+# ---- Node / Next.js ----
+node_modules/
+web/.next/
+web/out/
+web/build/
+web/next-env.d.ts
+*.tsbuildinfo
+
+# ---- Environment / generated ----
+.env
+.env.local
+.env*.local
+deployment-info.txt
+
+# ---- Editor / OS ----
+.DS_Store
+.vscode/
+.idea/
+*.log

@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-void text-slate-300 antialiased;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    radial-gradient(50rem 30rem at 80% -10%, rgba(34, 211, 238, 0.06), transparent 60%),
+    radial-gradient(45rem 30rem at 0% 110%, rgba(251, 191, 36, 0.05), transparent 60%);
+  background-size: 46px 46px, 46px 46px, 100% 100%, 100% 100%;
+  min-height: 100vh;
+}
+
+/* panels */
+.panel {
+  @apply rounded-xl border border-white/10 bg-void-800/70 backdrop-blur-sm;
+}
+.panel-pad {
+  @apply panel p-5;
+}
+
+/* buttons */
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold uppercase tracking-wide transition disabled:cursor-not-allowed disabled:opacity-40;
+}
+.btn-signal {
+  @apply btn bg-signal text-void hover:brightness-110;
+}
+.btn-offer {
+  @apply btn bg-offer text-void hover:brightness-110;
+}
+.btn-ghost {
+  @apply btn border border-white/15 bg-white/5 text-slate-200 hover:bg-white/10;
+}
+.btn-danger {
+  @apply btn border border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20;
+}
+
+/* forms */
+.field {
+  @apply w-full rounded-lg border border-white/10 bg-void-700 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-offer/50;
+}
+.label {
+  @apply mb-1 block text-[11px] font-semibold uppercase tracking-wider text-slate-500;
+}
+
+/* bits */
+.mono {
+  @apply font-mono text-xs;
+}
+.tag {
+  @apply inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide;
+}
+.card-title {
+  @apply font-display text-sm font-bold uppercase tracking-widest text-slate-400;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rise { animation: rise 0.4s cubic-bezier(0.22,1,0.36,1) both; }
