@@ -1,0 +1,25 @@
+# ---- Foundry (sc/) ----
+sc/cache/
+sc/out/
+sc/lib/
+sc/broadcast/
+sc/.gas-snapshot
+
+# ---- Node / Next.js (dapp/) ----
+node_modules/
+dapp/.next/
+dapp/out/
+dapp/build/
+dapp/next-env.d.ts
+*.tsbuildinfo
+
+# ---- Environment / secrets ----
+.env
+.env.local
+.env*.local
+
+# ---- Editor / OS ----
+.DS_Store
+.vscode/
+.idea/
+*.log
