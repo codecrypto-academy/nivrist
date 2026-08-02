@@ -26,11 +26,25 @@ CodeCrypto/
 
 ---
 
-## 🚀 Puesta en marcha (3 terminales)
+## 🧑‍🏫 Para evaluar (inicio rápido)
 
 ### Requisitos
 - Node.js 18+
 - [Foundry](https://book.getfoundry.sh/) (`curl -L https://foundry.paradigm.xyz | bash && foundryup`)
+
+### Opción A — con `make` (recomendado)
+```bash
+make setup     # instala libs de Foundry + npm, compila y corre los 12 tests
+```
+Luego, en **3 terminales**:
+```bash
+make anvil     # Terminal 1 — nodo local
+make deploy    # Terminal 2 — despliega el contrato
+make dev       # Terminal 3 — frontend en http://localhost:3000
+```
+Otros targets: `make test`, `make coverage`, `make build`, `make clean` (ver `make help`).
+
+### Opción B — manual (3 terminales)
 
 ### Terminal 1 — Nodo local
 ```bash
