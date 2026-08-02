@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  @apply bg-paper text-ink antialiased;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(22, 19, 14, 0.06) 1px, transparent 0);
+  background-size: 22px 22px;
+  min-height: 100vh;
+}
+
+/* --- cards / surfaces --- */
+.card {
+  @apply rounded-2xl border-2 border-ink bg-paper shadow-hard;
+}
+.card-white {
+  @apply rounded-2xl border-2 border-ink bg-white shadow-hard;
+}
+
+/* --- buttons --- */
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl border-2 border-ink px-4 py-2.5 text-sm font-bold transition active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50;
+}
+.btn-violet {
+  @apply btn bg-violet text-white shadow-hard hover:-translate-y-0.5 hover:shadow-hard-lg;
+}
+.btn-coral {
+  @apply btn bg-coral text-ink shadow-hard hover:-translate-y-0.5 hover:shadow-hard-lg;
+}
+.btn-ink {
+  @apply btn bg-ink text-paper shadow-hard hover:-translate-y-0.5;
+}
+.btn-outline {
+  @apply btn bg-paper text-ink shadow-hard-sm hover:bg-white;
+}
+
+/* --- forms --- */
+.field {
+  @apply w-full rounded-xl border-2 border-ink bg-white px-3 py-2.5 text-sm font-medium text-ink outline-none placeholder:text-ink/40 focus:shadow-hard-sm;
+}
+
+/* --- bits --- */
+.tag {
+  @apply inline-flex items-center gap-1 rounded-full border-2 border-ink px-2.5 py-0.5 text-xs font-bold;
+}
+.mono {
+  @apply font-mono text-xs;
+}
+.price {
+  @apply font-display font-bold tabular-nums;
+}
