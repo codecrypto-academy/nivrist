@@ -18,6 +18,9 @@ node_modules/
 .env.local
 .env*.local
 
+# ---- Runtime ----
+.logs/
+
 # ---- Editor / OS ----
 .DS_Store
 .vscode/
