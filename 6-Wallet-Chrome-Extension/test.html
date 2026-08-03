@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CodeCrypto · Test dApp</title>
+    <style>
+      body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; background: #14131c; color: #eae7f5; }
+      h1 { font-size: 22px; }
+      button { background: #6c4cf0; color: #fff; border: 0; border-radius: 8px; padding: 9px 14px; font-weight: 600; cursor: pointer; margin: 4px 4px 4px 0; }
+      button:disabled { opacity: .5; cursor: not-allowed; }
+      .card { background: #1e1c2b; border: 1px solid #3a3556; border-radius: 12px; padding: 16px; margin: 12px 0; }
+      .mono { font-family: ui-monospace, monospace; font-size: 13px; word-break: break-all; }
+      .muted { color: #9a95b8; }
+      #log { background: #0d0c14; border: 1px solid #3a3556; border-radius: 8px; padding: 10px; font-family: ui-monospace, monospace; font-size: 12px; max-height: 260px; overflow: auto; }
+      .ok { color: #8cf5c6; } .err { color: #ff6b4a; } .ev { color: #9ecbff; }
+    </style>
+  </head>
+  <body>
+    <h1>🔐 CodeCrypto · Test dApp</h1>
+    <div class="card">
+      <div>Provider: <span id="detected" class="muted">detectando…</span></div>
+      <div>Cuenta / Account: <span id="account" class="mono muted">—</span></div>
+      <div>Red / Network: <span id="chain" class="muted">—</span></div>
+      <div>Balance: <span id="balance" class="mono muted">—</span></div>
+    </div>
+    <div class="card">
+      <button id="connect">Conectar / Connect</button>
+      <button id="getBalance" disabled>Balance</button>
+      <button id="sendTx" disabled>Enviar 0.1 ETH / Send</button>
+      <button id="signTyped" disabled>Firmar EIP-712 / Sign</button>
+      <button id="switchSepolia" disabled>→ Sepolia</button>
+      <button id="switchLocal" disabled>→ Hardhat</button>
+    </div>
+    <div class="card"><div class="muted" style="margin-bottom:6px">Log</div><div id="log"></div></div>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const logEl = $("log");
+      let account = null, chainId = null;
+      function log(msg, cls = "") { const d = document.createElement("div"); d.className = cls; d.textContent = msg; logEl.prepend(d); }
+      const p = window.codecrypto;
+
+      if (p && p.isCodeCrypto) { $("detected").textContent = "✅ window.codecrypto"; $("detected").className = "ok"; }
+      else { $("detected").textContent = "❌ no detectado — carga la extensión"; $("detected").className = "err"; }
+
+      function setConnected(acc) {
+        account = acc; $("account").textContent = acc; $("account").className = "mono";
+        ["getBalance","sendTx","signTyped","switchSepolia","switchLocal"].forEach((id) => $(id).disabled = false);
+      }
+      async function refreshChain() { chainId = await p.request({ method: "eth_chainId" }); $("chain").textContent = chainId; }
+      async function refreshBalance() {
+        if (!account) return;
+        const bal = await p.request({ method: "eth_getBalance", params: [account, "latest"] });
+        $("balance").textContent = (Number(BigInt(bal)) / 1e18).toFixed(4) + " ETH";
+      }
+
+      $("connect").onclick = async () => {
+        try {
+          const accs = await p.request({ method: "eth_requestAccounts" });
+          setConnected(accs[0]); await refreshChain(); await refreshBalance();
+          log("✅ conectado: " + accs[0], "ok");
+          p.on("accountsChanged", (a) => { setConnected(a[0]); refreshBalance(); log("⇄ accountsChanged: " + a[0], "ev"); });
+          p.on("chainChanged", (c) => { chainId = c; $("chain").textContent = c; refreshBalance(); log("⇄ chainChanged: " + c, "ev"); });
+        } catch (e) { log("✖ " + e.message, "err"); }
+      };
+      $("getBalance").onclick = () => refreshBalance().then(() => log("balance actualizado", "ok")).catch((e) => log("✖ " + e.message, "err"));
+      $("sendTx").onclick = async () => {
+        try {
+          const hash = await p.request({ method: "eth_sendTransaction", params: [{ from: account, to: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", value: "0x" + (0.1 * 1e18).toString(16), data: "0x" }] });
+          log("✅ tx: " + hash, "ok"); setTimeout(refreshBalance, 1500);
+        } catch (e) { log("✖ " + e.message, "err"); }
+      };
+      $("signTyped").onclick = async () => {
+        const typedData = {
+          types: { EIP712Domain: [{ name: "name", type: "string" }, { name: "version", type: "string" }, { name: "chainId", type: "uint256" }, { name: "verifyingContract", type: "address" }], Person: [{ name: "name", type: "string" }, { name: "wallet", type: "address" }] },
+          primaryType: "Person",
+          domain: { name: "CodeCrypto Test App", version: "1", chainId: parseInt(chainId, 16), verifyingContract: "0x0000000000000000000000000000000000000000" },
+          message: { name: "Alice", wallet: account },
+        };
+        try { const sig = await p.request({ method: "eth_signTypedData_v4", params: [account, JSON.stringify(typedData)] }); log("✅ firma: " + sig, "ok"); }
+        catch (e) { log("✖ " + e.message, "err"); }
+      };
+      $("switchSepolia").onclick = () => p.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0xaa36a7" }] }).then(() => log("→ Sepolia solicitado", "ev")).catch((e) => log("✖ " + e.message, "err"));
+      $("switchLocal").onclick = () => p.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x7a69" }] }).then(() => log("→ Hardhat solicitado", "ev")).catch((e) => log("✖ " + e.message, "err"));
+    </script>
+  </body>
+</html>
