@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: #0a0b0d;
+  color: #f4efe3;
+}
+
+body {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  /* subtle warm vignette + grain over near-black */
+  background-image:
+    radial-gradient(120% 80% at 50% -10%, rgba(216, 180, 90, 0.08), transparent 60%),
+    radial-gradient(100% 60% at 100% 110%, rgba(127, 174, 138, 0.05), transparent 60%);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* fine grain overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* hairline ruled paper effect for panels */
+.rule-line {
+  background-image: linear-gradient(to bottom, transparent 0, transparent calc(100% - 1px), rgba(216, 180, 90, 0.12) 100%);
+}
+
+.tabnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+::selection {
+  background: rgba(216, 180, 90, 0.3);
+  color: #f4efe3;
+}
+
+/* scrollbar */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #2a313b;
+  border-radius: 0;
+}
+*::-webkit-scrollbar-track {
+  background: #101216;
+}
+
+input,
+select {
+  font-family: var(--font-mono), monospace;
+}
+
+/* focus ring */
+.focus-gold:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 1px #0a0b0d, 0 0 0 2px rgba(216, 180, 90, 0.6);
+}

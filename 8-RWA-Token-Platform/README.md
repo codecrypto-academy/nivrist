@@ -27,6 +27,8 @@ module approves it.
 - **EIP-1167 minimal-proxy clones** for cheap identity & token deployment via factories.
 - **Compliance presets** (NONE / BASIC / STANDARD / STRICT) via `CompliancePresetManager`.
 - **84 tests, 94.8% line coverage.** Unit + integration + full-lifecycle scenarios.
+- **Issuer dashboard** (`web/`) — bilingual Next.js + wagmi/viem console driving every contract:
+  KYC onboarding, token issuance, live compliance panel, agent operations. See [web/README.md](web/README.md).
 
 ### Architecture (short)
 
@@ -103,6 +105,9 @@ si el receptor está verificado (KYC), ninguna parte está congelada, el token n
 - **Clones EIP-1167** para desplegar identidades y tokens de forma barata vía factories.
 - **Presets de compliance** (NONE / BASIC / STANDARD / STRICT) con `CompliancePresetManager`.
 - **84 tests, 94.8% de cobertura de líneas.** Unitarios + integración + ciclo de vida completo.
+- **Dashboard del emisor** (`web/`) — consola bilingüe en Next.js + wagmi/viem que opera todos los
+  contratos: alta KYC, emisión de tokens, panel de compliance en vivo y operativa de agente.
+  Ver [web/README.md](web/README.md).
 
 ### Arranque rápido
 
