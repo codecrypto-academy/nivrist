@@ -3,11 +3,13 @@ pragma solidity ^0.8.20;
 
 import { Test } from "forge-std/Test.sol";
 import { IdentityRegistry } from "../src/identity/IdentityRegistry.sol";
+import { TrustedIssuersRegistry } from "../src/identity/TrustedIssuersRegistry.sol";
 import { IdentityCloneFactory } from "../src/factory/IdentityCloneFactory.sol";
 import { Identity } from "../src/identity/Identity.sol";
 
 contract IdentityRegistryTest is Test {
     IdentityRegistry registry;
+    TrustedIssuersRegistry tir;
     IdentityCloneFactory factory;
 
     address agent = makeAddr("agent");
@@ -16,7 +18,8 @@ contract IdentityRegistryTest is Test {
     uint256 constant KYC = 1;
 
     function setUp() public {
-        registry = new IdentityRegistry(address(this));
+        tir = new TrustedIssuersRegistry(address(this));
+        registry = new IdentityRegistry(address(this), address(tir));
         factory = new IdentityCloneFactory();
     }
 
@@ -73,10 +76,9 @@ contract IdentityRegistryTest is Test {
         registry.addClaimTopic(KYC);
     }
 
-    function test_TrustedIssuerToggle() public {
-        registry.setTrustedIssuer(KYC, issuer, true);
-        assertTrue(registry.isTrustedIssuer(KYC, issuer));
-        registry.setTrustedIssuer(KYC, issuer, false);
-        assertFalse(registry.isTrustedIssuer(KYC, issuer));
+    function test_SetTrustedIssuersRegistry() public {
+        TrustedIssuersRegistry tir2 = new TrustedIssuersRegistry(address(this));
+        registry.setTrustedIssuersRegistry(address(tir2));
+        assertEq(address(registry.trustedIssuersRegistry()), address(tir2));
     }
 }

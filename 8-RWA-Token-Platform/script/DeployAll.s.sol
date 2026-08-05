@@ -5,6 +5,7 @@ import { Script } from "forge-std/Script.sol";
 import { console2 } from "forge-std/console2.sol";
 import { IdentityCloneFactory } from "../src/factory/IdentityCloneFactory.sol";
 import { IdentityRegistry } from "../src/identity/IdentityRegistry.sol";
+import { TrustedIssuersRegistry } from "../src/identity/TrustedIssuersRegistry.sol";
 import { TokenCloneFactory } from "../src/factory/TokenCloneFactory.sol";
 import { CompliancePresetManager } from "../src/compliance/CompliancePresetManager.sol";
 
@@ -30,13 +31,16 @@ contract DeployAll is Script {
         if (pk == 0) vm.startBroadcast();
         else vm.startBroadcast(pk);
 
-        // 1) Infra de identidad
+        // 1) Infra de identidad (registro de issuers de confianza separado)
         IdentityCloneFactory idFactory = new IdentityCloneFactory();
-        IdentityRegistry registry = new IdentityRegistry(deployer);
+        TrustedIssuersRegistry tir = new TrustedIssuersRegistry(deployer);
+        IdentityRegistry registry = new IdentityRegistry(deployer, address(tir));
 
         // 2) KYC obligatorio + issuer de confianza
         registry.addClaimTopic(KYC_TOPIC);
-        registry.setTrustedIssuer(KYC_TOPIC, issuer, true);
+        uint256[] memory topics = new uint256[](1);
+        topics[0] = KYC_TOPIC;
+        tir.addTrustedIssuer(issuer, topics);
         registry.setAgent(deployer, true);
 
         // 3) Fábrica de tokens + gestor de presets
@@ -47,6 +51,7 @@ contract DeployAll is Script {
 
         console2.log("== RWA Token Platform desplegada ==");
         console2.log("IdentityCloneFactory   :", address(idFactory));
+        console2.log("TrustedIssuersRegistry :", address(tir));
         console2.log("IdentityRegistry       :", address(registry));
         console2.log("TokenCloneFactory      :", address(tokenFactory));
         console2.log("  tokenImplementation  :", tokenFactory.tokenImplementation());

@@ -3,12 +3,14 @@ pragma solidity ^0.8.20;
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { Identity } from "./Identity.sol";
+import { TrustedIssuersRegistry } from "./TrustedIssuersRegistry.sol";
 import { IIdentityRegistry } from "../interfaces/IIdentityRegistry.sol";
 
 /// @title IdentityRegistry — registro de inversores verificados (ERC-3643 simplificado)
 /// @notice Vincula wallet → Identity + país. Un inversor está "verificado" si su Identity
-///         tiene todos los claim topics requeridos, cada uno emitido por un trusted issuer.
-///         El Token consulta `isVerified(to)` antes de permitir que reciba tokens.
+///         tiene todos los claim topics requeridos, cada uno emitido por un issuer declarado en
+///         el TrustedIssuersRegistry (contrato aparte). El Token consulta `isVerified(to)` antes
+///         de permitir que reciba tokens.
 contract IdentityRegistry is IIdentityRegistry, Ownable {
     mapping(address => address) private _identity; // wallet => Identity
     mapping(address => uint16) private _country;
@@ -16,22 +18,25 @@ contract IdentityRegistry is IIdentityRegistry, Ownable {
 
     uint256[] public requiredClaimTopics;
     mapping(uint256 => bool) private _isRequiredTopic;
-    // topic => issuer => confiable
-    mapping(uint256 => mapping(address => bool)) public isTrustedIssuer;
+
+    /// @notice Registro de issuers de confianza (contrato separado, estilo T-REX).
+    TrustedIssuersRegistry public trustedIssuersRegistry;
 
     event IdentityRegistered(address indexed user, address indexed identity, uint16 country);
     event IdentityRemoved(address indexed user);
     event CountryUpdated(address indexed user, uint16 country);
     event AgentSet(address indexed agent, bool status);
     event ClaimTopicAdded(uint256 indexed topic);
-    event TrustedIssuerSet(uint256 indexed topic, address indexed issuer, bool status);
+    event TrustedIssuersRegistrySet(address indexed registry);
 
     modifier onlyAgent() {
         require(isAgent[msg.sender] || msg.sender == owner(), "IR: not agent");
         _;
     }
 
-    constructor(address initialOwner) Ownable(initialOwner) { }
+    constructor(address initialOwner, address trustedIssuersRegistry_) Ownable(initialOwner) {
+        trustedIssuersRegistry = TrustedIssuersRegistry(trustedIssuersRegistry_);
+    }
 
     // ---- configuración (owner) ----
     function setAgent(address agent, bool status) external onlyOwner {
@@ -39,16 +44,16 @@ contract IdentityRegistry is IIdentityRegistry, Ownable {
         emit AgentSet(agent, status);
     }
 
+    function setTrustedIssuersRegistry(address registry) external onlyOwner {
+        trustedIssuersRegistry = TrustedIssuersRegistry(registry);
+        emit TrustedIssuersRegistrySet(registry);
+    }
+
     function addClaimTopic(uint256 topic) external onlyOwner {
         require(!_isRequiredTopic[topic], "IR: topic exists");
         _isRequiredTopic[topic] = true;
         requiredClaimTopics.push(topic);
         emit ClaimTopicAdded(topic);
-    }
-
-    function setTrustedIssuer(uint256 topic, address issuer, bool status) external onlyOwner {
-        isTrustedIssuer[topic][issuer] = status;
-        emit TrustedIssuerSet(topic, issuer, status);
     }
 
     // ---- registro de identidades (agent) ----
@@ -93,7 +98,10 @@ contract IdentityRegistry is IIdentityRegistry, Ownable {
         for (uint256 i = 0; i < len; i++) {
             uint256 topic = requiredClaimTopics[i];
             if (!identity.hasClaim(topic)) return false;
-            if (!isTrustedIssuer[topic][identity.claimIssuer(topic)]) return false;
+            if (!trustedIssuersRegistry.isTrustedIssuerForTopic(topic, identity.claimIssuer(topic)))
+            {
+                return false;
+            }
         }
         return true;
     }

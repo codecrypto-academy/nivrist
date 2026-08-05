@@ -9,6 +9,7 @@ import { useT } from "@/lib/i18n";
 import { useTx, errMsg } from "@/lib/useTx";
 import { parseAmount } from "@/lib/format";
 import { useTokens, type TokenKind } from "@/lib/tokens";
+import { saveTokenMeta } from "@/lib/offchain";
 import { Panel, Field, Button, Addr, useToast } from "./ui";
 
 const KINDS: { id: TokenKind; label: string }[] = [
@@ -32,6 +33,7 @@ export function IssueToken() {
   const [maxBalance, setMaxBalance] = useState("500000");
   const [maxHolders, setMaxHolders] = useState("100");
   const [lockup, setLockup] = useState("0");
+  const [description, setDescription] = useState("");
 
   async function implFor(k: TokenKind): Promise<Address> {
     if (k === "realestate") return addresses.realEstateImpl;
@@ -74,6 +76,8 @@ export function IssueToken() {
       })) as bigint;
 
       add({ address: last.token, name, symbol, aggregator: last.aggregator, modules: Number(modules), kind });
+      // metadata off-chain (MongoDB) — opcional
+      void saveTokenMeta({ address: last.token, description, assetType: kind });
       show(`${t("issDeployed")}: ${symbol}`);
     } catch (e) {
       show(errMsg(e), "err");
@@ -132,6 +136,14 @@ export function IssueToken() {
             hint={t("issZeroHint")}
             value={lockup}
             onChange={(e) => setLockup(e.target.value)}
+          />
+        </div>
+        <div className="mt-4">
+          <Field
+            label={t("issDescription")}
+            hint={t("issOffchain")}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
           />
         </div>
         <div className="mt-5">

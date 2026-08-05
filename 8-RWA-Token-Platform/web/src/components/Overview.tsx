@@ -1,14 +1,20 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useAccount, useReadContract } from "wagmi";
 import { addresses } from "@/config/addresses";
 import { IdentityRegistryAbi } from "@/config/abis";
 import { useT } from "@/lib/i18n";
+import { mongoHealth } from "@/lib/offchain";
 import { Panel, Addr, StatusDot, Stat } from "./ui";
 
 export function Overview() {
   const { t } = useT();
   const { address } = useAccount();
+  const [mongoUp, setMongoUp] = useState<boolean | null>(null);
+  useEffect(() => {
+    void mongoHealth().then(setMongoUp);
+  }, []);
 
   const { data: verified } = useReadContract({
     address: addresses.identityRegistry,
@@ -32,11 +38,19 @@ export function Overview() {
     <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
       <Panel index="00" title={t("ovInfra")}>
         <dl className="divide-y divide-ink-500/50">
+          <Row label={t("ovTrustedIssuers")} value={addresses.trustedIssuersRegistry} />
           <Row label={t("ovRegistry")} value={addresses.identityRegistry} />
           <Row label={t("ovTokenFactory")} value={addresses.tokenCloneFactory} />
+          <Row label={t("ovMarketplace")} value={addresses.marketplace} />
           <Row label={t("ovPresetMgr")} value={addresses.compliancePresetManager} />
-          <Row label={t("ovDemoToken")} value={addresses.demoToken} />
           <Row label={t("ovDeployer")} value={addresses.deployer} />
+          <div className="flex items-center justify-between py-3">
+            <span className="text-[12.5px] text-parchment-dim">{t("ovMongo")}</span>
+            <StatusDot
+              ok={!!mongoUp}
+              label={mongoUp === null ? "…" : mongoUp ? t("ovMongoUp") : t("ovMongoDown")}
+            />
+          </div>
         </dl>
       </Panel>
 

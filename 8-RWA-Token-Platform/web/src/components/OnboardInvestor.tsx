@@ -9,6 +9,7 @@ import { ANVIL_ACCOUNTS } from "@/config/wagmi";
 import { useT } from "@/lib/i18n";
 import { useTx, errMsg } from "@/lib/useTx";
 import { isAddress } from "@/lib/format";
+import { saveInvestor } from "@/lib/offchain";
 import { Panel, Field, Button, StatusDot, useToast } from "./ui";
 
 const STEP_KEYS = ["onbStep1", "onbStep2", "onbStep3"] as const;
@@ -22,6 +23,8 @@ export function OnboardInvestor() {
 
   const [wallet, setWallet] = useState<string>(ANVIL_ACCOUNTS[2]);
   const [country, setCountry] = useState("840");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [step, setStep] = useState(0);
   const [verified, setVerified] = useState<boolean | null>(null);
 
@@ -86,6 +89,9 @@ export function OnboardInvestor() {
         args: [investor, identity, Number(country)],
       });
 
+      // guarda el perfil KYC off-chain (MongoDB) — opcional, degrada si Mongo no está
+      void saveInvestor({ wallet: investor, name, email, country });
+
       setStep(0);
       setVerified(true);
       show(t("onbDone"));
@@ -112,6 +118,11 @@ export function OnboardInvestor() {
             value={country}
             onChange={(e) => setCountry(e.target.value)}
           />
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={t("onbName")} value={name} onChange={(e) => setName(e.target.value)} />
+            <Field label={t("onbEmail")} value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+          <p className="text-[11px] text-parchment-faint/70">{t("onbOffchain")}</p>
           <div className="flex flex-wrap gap-2 pt-1">
             <Button onClick={onboard} loading={pending} disabled={!valid || !isIssuer}>
               {t("onbRun")}

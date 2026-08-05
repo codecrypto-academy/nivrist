@@ -19,16 +19,22 @@ module approves it.
 
 - **Permissioned ERC-20** — transfers gated by identity + compliance, with agent operations
   (mint, burn, freeze, pause, forced recovery transfer).
-- **On-chain identity** (ONCHAINID-style) with claims, trusted issuers and required claim topics.
+- **On-chain identity** (ONCHAINID-style) with claims and required claim topics, plus a **separate
+  `TrustedIssuersRegistry`** (T-REX style) declaring which issuers are trusted per topic.
 - **Modular compliance** — a `ComplianceAggregator` fans out to N pluggable modules; all must pass.
 - **6 compliance modules**, including a **custom Lock-up / vesting module**.
 - **2 asset token types**: `RealEstateToken` (rent → on-chain dividends) and `EquityToken`
   (balance-weighted governance).
 - **EIP-1167 minimal-proxy clones** for cheap identity & token deployment via factories.
 - **Compliance presets** (NONE / BASIC / STANDARD / STRICT) via `CompliancePresetManager`.
-- **84 tests, 94.8% line coverage.** Unit + integration + full-lifecycle scenarios.
+- **99 tests, ~95.7% line coverage.** Unit + integration + full-lifecycle scenarios.
+- **On-chain `Marketplace`** — secondary market (list / buy with ETH / cancel) whose settlement goes
+  through `transferFrom`, so it **inherits the token's full compliance** (only verified buyers).
+- **Off-chain layer (MongoDB)** — investor KYC profiles + token metadata behind Next.js API routes,
+  optional and gracefully degrading when Mongo is down.
 - **Issuer dashboard** (`web/`) — bilingual Next.js + wagmi/viem console driving every contract:
-  KYC onboarding, token issuance, live compliance panel, agent operations. See [web/README.md](web/README.md).
+  KYC onboarding, token issuance, live compliance panel, agent ops, dividends, governance,
+  marketplace. See [web/README.md](web/README.md).
 
 ### Architecture (short)
 
@@ -49,7 +55,7 @@ Full detail in **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
 ```bash
 forge install           # deps (forge-std, openzeppelin-contracts)
 forge build
-forge test              # 84 tests
+forge test              # 99 tests
 forge coverage          # ~95% lines
 ```
 
@@ -97,16 +103,22 @@ si el receptor está verificado (KYC), ninguna parte está congelada, el token n
 
 - **ERC-20 permisionado** — transferencias restringidas por identidad + compliance, con operativa
   de agente (emitir, quemar, congelar, pausar, transferencia forzada de recuperación).
-- **Identidad on-chain** (estilo ONCHAINID) con claims, _trusted issuers_ y topics requeridos.
+- **Identidad on-chain** (estilo ONCHAINID) con claims y topics requeridos, más un
+  **`TrustedIssuersRegistry` separado** (estilo T-REX) que declara qué issuers son de confianza.
 - **Compliance modular** — un `ComplianceAggregator` reparte a N módulos; todos deben aprobar.
 - **6 módulos de compliance**, incluido un **módulo Lock-up / vesting personalizado**.
 - **2 tipos de token de activo**: `RealEstateToken` (renta → dividendos on-chain) y `EquityToken`
   (gobernanza ponderada por balance).
 - **Clones EIP-1167** para desplegar identidades y tokens de forma barata vía factories.
 - **Presets de compliance** (NONE / BASIC / STANDARD / STRICT) con `CompliancePresetManager`.
-- **84 tests, 94.8% de cobertura de líneas.** Unitarios + integración + ciclo de vida completo.
+- **99 tests, ~95.7% de cobertura de líneas.** Unitarios + integración + ciclo de vida completo.
+- **`Marketplace` on-chain** — mercado secundario (listar / comprar con ETH / cancelar) cuya
+  liquidación pasa por `transferFrom`, así que **hereda todo el compliance del token** (solo compra
+  quien está verificado).
+- **Capa off-chain (MongoDB)** — perfiles KYC de inversores + metadata de tokens tras API routes de
+  Next.js, opcional y con degradación elegante si Mongo no está.
 - **Dashboard del emisor** (`web/`) — consola bilingüe en Next.js + wagmi/viem que opera todos los
-  contratos: alta KYC, emisión de tokens, panel de compliance en vivo y operativa de agente.
+  contratos: alta KYC, emisión, compliance, operativa, dividendos, gobernanza y marketplace.
   Ver [web/README.md](web/README.md).
 
 ### Arranque rápido
@@ -114,7 +126,7 @@ si el receptor está verificado (KYC), ninguna parte está congelada, el token n
 ```bash
 forge install
 forge build
-forge test              # 84 tests
+forge test              # 99 tests
 forge coverage          # ~95% líneas
 ```
 
@@ -140,14 +152,16 @@ gas en **[docs/GAS_REPORT.md](docs/GAS_REPORT.md)**.
 ```
 src/
 ├── interfaces/          ICompliance, IIdentityRegistry
-├── identity/            Identity (clone), IdentityRegistry
+├── identity/            Identity (clone), IdentityRegistry, TrustedIssuersRegistry
 ├── token/               Token (ERC-3643 base), RealEstateToken, EquityToken
 ├── compliance/          ComplianceAggregator, AbstractModule, CompliancePresetManager
 │   └── modules/         MaxBalance, MaxHolders, Whitelist, CountryRestriction,
 │                        DailyTransferLimit, Lockup (custom)
-└── factory/             IdentityCloneFactory, TokenCloneFactory
-script/                  DeployAll, DeployDemo
-test/                    84 tests (unit + integration)
+├── factory/             IdentityCloneFactory, TokenCloneFactory
+└── marketplace/         Marketplace (secondary market, compliance-checked)
+script/                  DeployAll, DeployDemo, DeployWeb
+test/                    99 tests (unit + integration)
+web/                     Next.js dashboard + MongoDB/API off-chain layer
 ```
 
 ## Tech / Stack

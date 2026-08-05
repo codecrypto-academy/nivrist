@@ -4,11 +4,13 @@ pragma solidity ^0.8.20;
 import { Test } from "forge-std/Test.sol";
 import { Identity } from "../src/identity/Identity.sol";
 import { IdentityRegistry } from "../src/identity/IdentityRegistry.sol";
+import { TrustedIssuersRegistry } from "../src/identity/TrustedIssuersRegistry.sol";
 import { IdentityCloneFactory } from "../src/factory/IdentityCloneFactory.sol";
 
 contract IdentityTest is Test {
     IdentityCloneFactory factory;
     IdentityRegistry registry;
+    TrustedIssuersRegistry tir;
 
     address issuer = makeAddr("issuer");
     address alice = makeAddr("alice");
@@ -17,9 +19,12 @@ contract IdentityTest is Test {
 
     function setUp() public {
         factory = new IdentityCloneFactory();
-        registry = new IdentityRegistry(address(this));
+        tir = new TrustedIssuersRegistry(address(this));
+        uint256[] memory topics = new uint256[](1);
+        topics[0] = KYC;
+        tir.addTrustedIssuer(issuer, topics);
+        registry = new IdentityRegistry(address(this), address(tir));
         registry.addClaimTopic(KYC);
-        registry.setTrustedIssuer(KYC, issuer, true);
     }
 
     function test_FactoryCreatesInitializedClone() public {
@@ -95,7 +100,10 @@ contract IdentityTest is Test {
 
     function test_IsVerified_FalseWhenMissingRequiredClaim() public {
         registry.addClaimTopic(2); // AML topic también requerido
-        registry.setTrustedIssuer(2, issuer, true);
+        uint256[] memory topics = new uint256[](2);
+        topics[0] = KYC;
+        topics[1] = 2;
+        tir.updateIssuerTopics(issuer, topics);
         address id = factory.createIdentity(alice);
         vm.prank(issuer);
         Identity(id).addClaim(KYC, issuer, ""); // solo KYC, falta AML

@@ -47,6 +47,19 @@ you point it at `localhost:8545`, chain `31337`.
 | **Operations** | mint / burn · freeze / pause · forced transfer · live balance lookup |
 | **Dividends** | Real-estate tokens: deposit rent (ETH), per-holder pro-rata table, claim |
 | **Governance** | Equity tokens: create proposals, balance-weighted voting, execute |
+| **Marketplace** | Secondary market: list (approve + list), buy with ETH (compliance-checked), cancel |
+
+### Off-chain layer (MongoDB)
+
+Following the reference architecture, off-chain data (investor KYC profiles, token metadata) lives
+in **MongoDB** behind Next.js API routes (`/api/investors`, `/api/tokens`, `/api/health`). It is
+**optional and degrades gracefully**: with no Mongo running, the API reports it unavailable and the
+on-chain dApp keeps working (metadata is simply empty). To enable it, run a local MongoDB and set
+`MONGODB_URI` (see `.env.local.example`):
+
+```bash
+docker run -d -p 27017:27017 --name rwa-mongo mongo   # or: brew services start mongodb-community
+```
 
 The **Issue token** tab has a type selector (Base / Real Estate / Equity); Real Estate and
 Equity tokens unlock the Dividends and Governance tabs respectively. The demo deployment seeds
@@ -92,6 +105,19 @@ cuenta para actuar como owner/agent (#0) o como el inversor verificado (#1). `Me
 | **Operativa** | mint / burn · congelar / pausar · transferencia forzada · balance en vivo |
 | **Dividendos** | Tokens Real Estate: depositar renta (ETH), tabla por holder, reclamar |
 | **Gobernanza** | Tokens Equity: crear propuestas, voto ponderado por balance, ejecutar |
+| **Marketplace** | Mercado secundario: publicar (aprobar + listar), comprar con ETH (con compliance), cancelar |
+
+### Capa off-chain (MongoDB)
+
+Siguiendo el diagrama de referencia, los datos off-chain (perfiles KYC de inversores, metadata de
+tokens) viven en **MongoDB** detrás de API routes de Next.js (`/api/investors`, `/api/tokens`,
+`/api/health`). Es **opcional y degrada con gracia**: sin Mongo, la API lo reporta como no
+disponible y el dApp on-chain sigue funcionando. Para habilitarlo, corre un MongoDB local y define
+`MONGODB_URI` (ver `.env.local.example`):
+
+```bash
+docker run -d -p 27017:27017 --name rwa-mongo mongo   # o: brew services start mongodb-community
+```
 
 La pestaña **Emitir token** tiene selector de tipo (Base / Real Estate / Equity); los tokens
 Real Estate y Equity habilitan las pestañas Dividendos y Gobernanza. El deploy demo siembra uno

@@ -5,22 +5,19 @@ import { Script } from "forge-std/Script.sol";
 import { console2 } from "forge-std/console2.sol";
 import { IdentityCloneFactory } from "../src/factory/IdentityCloneFactory.sol";
 import { IdentityRegistry } from "../src/identity/IdentityRegistry.sol";
+import { TrustedIssuersRegistry } from "../src/identity/TrustedIssuersRegistry.sol";
 import { TokenCloneFactory } from "../src/factory/TokenCloneFactory.sol";
 import { CompliancePresetManager } from "../src/compliance/CompliancePresetManager.sol";
+import { Marketplace } from "../src/marketplace/Marketplace.sol";
 import { Identity } from "../src/identity/Identity.sol";
 import { Token } from "../src/token/Token.sol";
 import { RealEstateToken } from "../src/token/RealEstateToken.sol";
 import { EquityToken } from "../src/token/EquityToken.sol";
 
-/// @title DeployWeb — despliega la infra completa + tokens demo y escribe deployment.json.
-/// @notice Deja listo el dashboard: infra + preset manager + implementaciones de los 3 tipos de
-///         token (base, real-estate, equity) + un token demo de cada uno con holders verificados.
-///         RealEstate ya trae rentas depositadas y Equity una propuesta abierta.
-///
-///   anvil
-///   forge script script/DeployWeb.s.sol --rpc-url http://127.0.0.1:8545 \
-///     --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
-///     --broadcast
+/// @title DeployWeb — despliega la infra completa + tokens demo + marketplace y escribe el JSON.
+/// @notice Deja listo el dashboard: registro de issuers de confianza (contrato aparte), identity
+///         registry, factory + presets, marketplace, e implementaciones de los 3 tipos de token,
+///         con un demo de cada uno y una orden de venta ya publicada.
 contract DeployWeb is Script {
     uint256 internal constant KYC_TOPIC = 1;
     string internal constant OUT = "./web/src/config/deployment.json";
@@ -34,6 +31,20 @@ contract DeployWeb is Script {
     IdentityRegistry internal registry;
     address internal deployer;
 
+    struct Addrs {
+        address idFactory;
+        address trustedIssuersRegistry;
+        address registry;
+        address factory;
+        address presetManager;
+        address marketplace;
+        address reImpl;
+        address eqImpl;
+        address demoToken;
+        address demoRE;
+        address demoEQ;
+    }
+
     function run() external {
         uint256 pk = vm.envOr(
             "PRIVATE_KEY",
@@ -43,29 +54,47 @@ contract DeployWeb is Script {
 
         vm.startBroadcast(pk);
 
-        // infra
+        Addrs memory a;
+
+        // --- infra de identidad (trusted issuers en contrato aparte) ---
         idFactory = new IdentityCloneFactory();
-        registry = new IdentityRegistry(deployer);
+        TrustedIssuersRegistry tir = new TrustedIssuersRegistry(deployer);
+        registry = new IdentityRegistry(deployer, address(tir));
         registry.addClaimTopic(KYC_TOPIC);
-        registry.setTrustedIssuer(KYC_TOPIC, deployer, true);
+        uint256[] memory topics = new uint256[](1);
+        topics[0] = KYC_TOPIC;
+        tir.addTrustedIssuer(deployer, topics); // deployer = issuer de confianza
         registry.setAgent(deployer, true);
+
         TokenCloneFactory factory = new TokenCloneFactory();
         CompliancePresetManager presetManager = new CompliancePresetManager();
+        Marketplace marketplace = new Marketplace();
 
-        // implementaciones de los tipos especiales (para clonar desde el dashboard)
         address reImpl = address(new RealEstateToken());
         address eqImpl = address(new EquityToken());
 
-        // inversores verificados
+        // inversores verificados (+ el deployer, para que pueda ser vendedor en el marketplace)
+        _verify(deployer);
         _verify(INV1);
         _verify(INV2);
         _verify(INV3);
 
-        // --- token base demo ---
+        // --- token base demo (+ orden de venta en el marketplace) ---
         (address demoToken,) = factory.createTokenWithCompliance(
-            factory.tokenImplementation(), "Demo Security Token", "DEMO", 18, deployer, address(registry), 1_000_000e18, 100, 0
+            factory.tokenImplementation(),
+            "Demo Security Token",
+            "DEMO",
+            18,
+            deployer,
+            address(registry),
+            1_000_000e18,
+            100,
+            0
         );
         Token(demoToken).mint(INV1, 10_000e18);
+        Token(demoToken).mint(deployer, 1_000e18); // stock del vendedor
+        Token(demoToken).approve(address(marketplace), 500e18);
+        marketplace.list(demoToken, 500e18, 0.5 ether); // 500 DEMO por 0.5 ETH
 
         // --- real-estate demo (con rentas depositadas) ---
         (address demoRE,) = factory.createTokenWithCompliance(
@@ -75,7 +104,7 @@ contract DeployWeb is Script {
         re.setPropertyRef("ipfs://QmDeedDowntownTower");
         re.mint(INV1, 6_000e18); // 60%
         re.mint(INV2, 4_000e18); // 40%
-        re.depositDividends{ value: 5 ether }(); // renta a repartir
+        re.depositDividends{ value: 5 ether }();
 
         // --- equity demo (con propuesta abierta) ---
         (address demoEQ,) = factory.createTokenWithCompliance(
@@ -88,24 +117,25 @@ contract DeployWeb is Script {
 
         vm.stopBroadcast();
 
-        _writeJson(
-            address(idFactory),
-            address(registry),
-            address(factory),
-            address(presetManager),
-            reImpl,
-            eqImpl,
-            demoToken,
-            demoRE,
-            demoEQ
-        );
+        a.idFactory = address(idFactory);
+        a.trustedIssuersRegistry = address(tir);
+        a.registry = address(registry);
+        a.factory = address(factory);
+        a.presetManager = address(presetManager);
+        a.marketplace = address(marketplace);
+        a.reImpl = reImpl;
+        a.eqImpl = eqImpl;
+        a.demoToken = demoToken;
+        a.demoRE = demoRE;
+        a.demoEQ = demoEQ;
+        _writeJson(a);
 
         console2.log("deployment.json escrito en", OUT);
-        console2.log("Registry :", address(registry));
-        console2.log("Factory  :", address(factory));
-        console2.log("Demo base:", demoToken);
-        console2.log("Demo RE  :", demoRE);
-        console2.log("Demo EQ  :", demoEQ);
+        console2.log("TrustedIssuersRegistry:", a.trustedIssuersRegistry);
+        console2.log("Marketplace           :", a.marketplace);
+        console2.log("Demo base             :", demoToken);
+        console2.log("Demo RE               :", demoRE);
+        console2.log("Demo EQ               :", demoEQ);
     }
 
     function _verify(address user) internal {
@@ -114,41 +144,21 @@ contract DeployWeb is Script {
         registry.registerIdentity(user, identity, 840);
     }
 
-    struct Addrs {
-        address idFactory;
-        address registry;
-        address factory;
-        address presetManager;
-        address reImpl;
-        address eqImpl;
-        address demoToken;
-        address demoRE;
-        address demoEQ;
-    }
-
-    function _writeJson(
-        address idFactory_,
-        address registry_,
-        address factory_,
-        address presetManager_,
-        address reImpl_,
-        address eqImpl_,
-        address demoToken_,
-        address demoRE_,
-        address demoEQ_
-    ) internal {
+    function _writeJson(Addrs memory a) internal {
         string memory obj = "deployment";
         vm.serializeUint(obj, "chainId", block.chainid);
         vm.serializeAddress(obj, "deployer", deployer);
-        vm.serializeAddress(obj, "identityCloneFactory", idFactory_);
-        vm.serializeAddress(obj, "identityRegistry", registry_);
-        vm.serializeAddress(obj, "tokenCloneFactory", factory_);
-        vm.serializeAddress(obj, "compliancePresetManager", presetManager_);
-        vm.serializeAddress(obj, "realEstateImpl", reImpl_);
-        vm.serializeAddress(obj, "equityImpl", eqImpl_);
-        vm.serializeAddress(obj, "demoToken", demoToken_);
-        vm.serializeAddress(obj, "demoRealEstate", demoRE_);
-        string memory json = vm.serializeAddress(obj, "demoEquity", demoEQ_);
+        vm.serializeAddress(obj, "identityCloneFactory", a.idFactory);
+        vm.serializeAddress(obj, "trustedIssuersRegistry", a.trustedIssuersRegistry);
+        vm.serializeAddress(obj, "identityRegistry", a.registry);
+        vm.serializeAddress(obj, "tokenCloneFactory", a.factory);
+        vm.serializeAddress(obj, "compliancePresetManager", a.presetManager);
+        vm.serializeAddress(obj, "marketplace", a.marketplace);
+        vm.serializeAddress(obj, "realEstateImpl", a.reImpl);
+        vm.serializeAddress(obj, "equityImpl", a.eqImpl);
+        vm.serializeAddress(obj, "demoToken", a.demoToken);
+        vm.serializeAddress(obj, "demoRealEstate", a.demoRE);
+        string memory json = vm.serializeAddress(obj, "demoEquity", a.demoEQ);
         vm.writeJson(json, OUT);
     }
 }

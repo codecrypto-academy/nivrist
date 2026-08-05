@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import { Test } from "forge-std/Test.sol";
 import { Identity } from "../../src/identity/Identity.sol";
 import { IdentityRegistry } from "../../src/identity/IdentityRegistry.sol";
+import { TrustedIssuersRegistry } from "../../src/identity/TrustedIssuersRegistry.sol";
 import { IdentityCloneFactory } from "../../src/factory/IdentityCloneFactory.sol";
 import { Token } from "../../src/token/Token.sol";
 import { ComplianceAggregator } from "../../src/compliance/ComplianceAggregator.sol";
@@ -13,6 +14,7 @@ import { ComplianceAggregator } from "../../src/compliance/ComplianceAggregator.
 ///      El contrato de test (`address(this)`) es owner/agent de todo lo que crea.
 contract RWATestBase is Test {
     IdentityRegistry internal registry;
+    TrustedIssuersRegistry internal tir;
     IdentityCloneFactory internal idFactory;
 
     address internal issuer = makeAddr("issuer");
@@ -28,9 +30,12 @@ contract RWATestBase is Test {
 
     function setUp() public virtual {
         idFactory = new IdentityCloneFactory();
-        registry = new IdentityRegistry(address(this));
+        tir = new TrustedIssuersRegistry(address(this));
+        uint256[] memory topics = new uint256[](1);
+        topics[0] = KYC_TOPIC;
+        tir.addTrustedIssuer(issuer, topics);
+        registry = new IdentityRegistry(address(this), address(tir));
         registry.addClaimTopic(KYC_TOPIC);
-        registry.setTrustedIssuer(KYC_TOPIC, issuer, true);
         registry.setAgent(address(this), true);
     }
 

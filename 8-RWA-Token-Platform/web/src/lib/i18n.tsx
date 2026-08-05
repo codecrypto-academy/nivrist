@@ -28,6 +28,7 @@ const DICT = {
   navOps: { es: "Operativa", en: "Operations" },
   navDividends: { es: "Dividendos", en: "Dividends" },
   navGovernance: { es: "Gobernanza", en: "Governance" },
+  navMarket: { es: "Marketplace", en: "Marketplace" },
 
   // wallet
   connect: { es: "Conectar", en: "Connect" },
@@ -42,10 +43,15 @@ const DICT = {
 
   // overview
   ovInfra: { es: "Infraestructura", en: "Infrastructure" },
+  ovTrustedIssuers: { es: "Trusted Issuers Registry", en: "Trusted Issuers Registry" },
   ovRegistry: { es: "Registro de identidades", en: "Identity registry" },
   ovTokenFactory: { es: "Fábrica de tokens", en: "Token factory" },
+  ovMarketplace: { es: "Marketplace", en: "Marketplace" },
   ovPresetMgr: { es: "Gestor de presets", en: "Preset manager" },
   ovDemoToken: { es: "Token demo", en: "Demo token" },
+  ovMongo: { es: "MongoDB (off-chain)", en: "MongoDB (off-chain)" },
+  ovMongoUp: { es: "conectado", en: "connected" },
+  ovMongoDown: { es: "no disponible", en: "unavailable" },
   ovVerified: { es: "verificado", en: "verified" },
   ovUnverified: { es: "no verificado", en: "unverified" },
   ovYourStatus: { es: "Tu estado KYC", en: "Your KYC status" },
@@ -61,6 +67,12 @@ const DICT = {
   },
   onbWallet: { es: "Wallet del inversor", en: "Investor wallet" },
   onbCountry: { es: "País (ISO num.)", en: "Country (ISO num.)" },
+  onbName: { es: "Nombre", en: "Name" },
+  onbEmail: { es: "Email", en: "Email" },
+  onbOffchain: {
+    es: "Nombre y email se guardan off-chain (MongoDB); solo el claim KYC va on-chain.",
+    en: "Name and email are stored off-chain (MongoDB); only the KYC claim goes on-chain.",
+  },
   onbStep1: { es: "1 · Crear identidad", en: "1 · Create identity" },
   onbStep2: { es: "2 · Emitir claim KYC", en: "2 · Issue KYC claim" },
   onbStep3: { es: "3 · Registrar", en: "3 · Register" },
@@ -94,6 +106,8 @@ const DICT = {
     es: "Equity: gobernanza con voto ponderado por balance.",
     en: "Equity: governance with balance-weighted voting.",
   },
+  issDescription: { es: "Descripción del activo", en: "Asset description" },
+  issOffchain: { es: "off-chain (MongoDB)", en: "off-chain (MongoDB)" },
   issDeploy: { es: "Emitir token", en: "Issue token" },
   issDeployed: { es: "Token emitido", en: "Token issued" },
   issSelect: { es: "Seleccionar", en: "Select" },
@@ -192,6 +206,32 @@ const DICT = {
   govRejected: { es: "Rechazada", en: "Rejected" },
   govEnds: { es: "Termina", en: "Ends" },
   govYourWeight: { es: "Tu poder de voto", en: "Your voting power" },
+
+  // marketplace
+  mktTitle: { es: "Mercado secundario", en: "Secondary market" },
+  mktDesc: {
+    es: "Publica órdenes de venta y compra tokens con ETH. La compra pasa por el compliance: solo un comprador verificado recibe los tokens.",
+    en: "Post sell orders and buy tokens with ETH. The buy goes through compliance: only a verified buyer receives the tokens.",
+  },
+  mktSell: { es: "Vender", en: "Sell" },
+  mktToken: { es: "Token", en: "Token" },
+  mktAmount: { es: "Cantidad", en: "Amount" },
+  mktPrice: { es: "Precio total (ETH)", en: "Total price (ETH)" },
+  mktListBtn: { es: "Aprobar y publicar", en: "Approve & list" },
+  mktSellHint: {
+    es: "Son 2 transacciones: aprobar al marketplace y publicar la orden.",
+    en: "Two transactions: approve the marketplace and post the order.",
+  },
+  mktListed: { es: "Orden publicada", en: "Order listed" },
+  mktActive: { es: "Órdenes activas", en: "Active orders" },
+  mktTotal: { es: "Órdenes totales", en: "Total orders" },
+  mktListings: { es: "Órdenes en venta", en: "Open orders" },
+  mktNoListings: { es: "No hay órdenes activas", en: "No active orders" },
+  mktSeller: { es: "Vendedor", en: "Seller" },
+  mktBuy: { es: "Comprar", en: "Buy" },
+  mktBought: { es: "Compra realizada", en: "Purchase complete" },
+  mktCancel: { es: "Cancelar", en: "Cancel" },
+  mktCancelled: { es: "Orden cancelada", en: "Order cancelled" },
 
   // shared
   address: { es: "Dirección", en: "Address" },

@@ -9,9 +9,11 @@ export interface Deployment {
   chainId: number;
   deployer: Address;
   identityCloneFactory: Address;
+  trustedIssuersRegistry: Address;
   identityRegistry: Address;
   tokenCloneFactory: Address;
   compliancePresetManager: Address;
+  marketplace: Address;
   realEstateImpl: Address;
   equityImpl: Address;
   demoToken: Address;

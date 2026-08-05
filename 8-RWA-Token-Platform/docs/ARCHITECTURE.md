@@ -231,3 +231,48 @@ solo el aggregator mute el estado del módulo, y el cableado `setToken` / `setCo
 - Revisado contra el checklist de seguridad obligatorio del proyecto (sin secretos, funciones que
   cambian estado con control de acceso, sin reentrancy en el único `call` externo de
   `claimDividends`, que sigue checks-effects-interactions).
+
+---
+
+## Extensiones · Alineación con el diagrama de referencia / Reference-architecture alignment
+
+La clase mostró una arquitectura RWA de referencia (3 apps Next.js + MongoDB + Anvil + contratos
+Identity/TrustedIssuers/Token). Esta implementación cierra los gaps clave manteniendo un único
+dashboard unificado. / The class showed a reference RWA architecture; this implementation closes
+the key gaps while keeping a single unified dashboard.
+
+### TrustedIssuersRegistry (contrato aparte)
+
+Como en T-REX real, los emisores de confianza viven en su propio contrato
+`TrustedIssuersRegistry` (topic → issuer). El `IdentityRegistry` guarda una referencia y lo
+consulta en `isVerified`: un claim solo cuenta si su issuer está registrado ahí para ese topic.
+Antes esta lógica estaba embebida en el `IdentityRegistry`. / Trusted issuers now live in their own
+contract; `IdentityRegistry` queries it in `isVerified`.
+
+### Marketplace (mercado secundario on-chain)
+
+`Marketplace` permite listar (aprobar + `list`), comprar (`buy` payable) y cancelar órdenes de
+security tokens contra ETH, **sin custodia** (allowance). La clave: la compra ejecuta
+`transferFrom`, que pasa por el `_update` del Token → **hereda todo el compliance del mercado
+primario** (comprador verificado, no congelado, token no en pausa, todos los módulos). Así el
+mercado secundario no puede saltarse las reglas. / The secondary market inherits the token's full
+compliance because settlement goes through `transferFrom`.
+
+### Capa off-chain (MongoDB + API)
+
+Los datos que no pertenecen on-chain (perfiles KYC de inversores: nombre/email; metadata de tokens:
+descripción/tipo) viven en **MongoDB** detrás de API routes de Next.js
+(`/api/investors`, `/api/tokens`, `/api/health`). On-chain solo va el claim KYC y el token; el resto
+es off-chain. Degrada con gracia: sin Mongo, la web reporta "no disponible" y sigue operando todo
+lo on-chain. / Off-chain data (investor KYC profile, token metadata) lives in MongoDB behind API
+routes; only the KYC claim and the token itself are on-chain. Degrades gracefully when Mongo is down.
+
+### Diferencias intencionales con el diagrama / Intentional differences
+
+- **1 dashboard con pestañas** en vez de 3 micro-frontends (identity / issuer / token) — misma
+  cobertura funcional, menos superficie. / One tabbed dashboard instead of three apps.
+- **Marketplace on-chain** (fuente de verdad = cadena) enriquecido con metadata de Mongo, en vez de
+  un order book puramente off-chain. / On-chain order book enriched with off-chain metadata.
+- Extras sobre el diagrama: **compliance modular** (6 módulos + presets) y **2 tipos de asset**
+  (RealEstate con dividendos, Equity con gobernanza), que el diagrama no incluye. / Beyond the
+  diagram: modular compliance and two asset token types.

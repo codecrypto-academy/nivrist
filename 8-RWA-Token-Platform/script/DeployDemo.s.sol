@@ -5,6 +5,7 @@ import { Script } from "forge-std/Script.sol";
 import { console2 } from "forge-std/console2.sol";
 import { IdentityCloneFactory } from "../src/factory/IdentityCloneFactory.sol";
 import { IdentityRegistry } from "../src/identity/IdentityRegistry.sol";
+import { TrustedIssuersRegistry } from "../src/identity/TrustedIssuersRegistry.sol";
 import { TokenCloneFactory } from "../src/factory/TokenCloneFactory.sol";
 import { Identity } from "../src/identity/Identity.sol";
 import { Token } from "../src/token/Token.sol";
@@ -34,9 +35,12 @@ contract DeployDemo is Script {
 
         // --- infra ---
         IdentityCloneFactory idFactory = new IdentityCloneFactory();
-        IdentityRegistry registry = new IdentityRegistry(deployer);
+        TrustedIssuersRegistry tir = new TrustedIssuersRegistry(deployer);
+        IdentityRegistry registry = new IdentityRegistry(deployer, address(tir));
         registry.addClaimTopic(KYC_TOPIC);
-        registry.setTrustedIssuer(KYC_TOPIC, deployer, true); // deployer = issuer
+        uint256[] memory topics = new uint256[](1);
+        topics[0] = KYC_TOPIC;
+        tir.addTrustedIssuer(deployer, topics); // deployer = issuer
         registry.setAgent(deployer, true);
         TokenCloneFactory tokenFactory = new TokenCloneFactory();
 
