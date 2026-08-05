@@ -1,0 +1,22 @@
+# Foundry
+sc/cache/
+sc/out/
+sc/lib/
+sc/broadcast/
+
+# Node / Next.js
+node_modules/
+web/.next/
+web/out/
+web/next-env.d.ts
+*.tsbuildinfo
+
+# Env / secrets
+.env
+.env.local
+.env*.local
+
+# OS / editor
+.DS_Store
+.vscode/
+*.log
