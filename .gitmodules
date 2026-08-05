@@ -1,0 +1,6 @@
+[submodule "8-RWA-Token-Platform/lib/forge-std"]
+	path = 8-RWA-Token-Platform/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "8-RWA-Token-Platform/lib/openzeppelin-contracts"]
+	path = 8-RWA-Token-Platform/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts

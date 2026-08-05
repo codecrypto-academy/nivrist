@@ -1,0 +1,11 @@
+# Foundry build artifacts
+out/
+cache/
+broadcast/
+
+# Docs / coverage
+lcov.info
+
+# Env
+.env
+.env.*
