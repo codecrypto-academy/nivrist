@@ -74,10 +74,22 @@ cuenta del fork con fondos. / In MetaMask add the local network with **Chain ID 
 cd sc && forge test        # 11/11 · Euro.sol 100% líneas
 ```
 
+## Verificado en fork de mainnet / Verified on a mainnet fork ✅
+
+El flujo completo se probó sobre el protocolo Superfluid real (fork de mainnet, Chain ID 1):
+`DeployAll` crea EURx (name "Super Euro", symbol "EURx") · upgrade EUR→EURx · `createFlow` a
+2000 EUR/mes (flowrate `771604938271604`) · el receptor recibió **2.777778 EURx en 1 h** (=
+`2000/(30·24)`, exacto) · deleteFlow (pausar) · downgrade EURx→EUR.
+
+Los flows se pueden crear también por CLI con el **CFAv1Forwarder** de Superfluid
+(`0xcfA132E353cB4E398080B9700609bb008eceB125`):
+`createFlow(token, sender, receiver, flowrate, userData)` / `deleteFlow(...)` /
+`getFlowrate(token, sender, receiver)`.
+
 ## Notas / Notes
 
 - **ethers v5** (no v6): lo requiere `@superfluid-finance/sdk-core`.
-- El `SuperTokenFactory` de `DeployAll.s.sol` usa la dirección de mainnet (override con env `FACTORY`);
-  la firma `createERC20Wrapper(address,uint8,string,string)` es la canónica del protocolo — si tu
-  versión de Superfluid difiere, ajústala. / factory address/signature are Superfluid-version specific.
+- El `SuperTokenFactory` de `DeployAll.s.sol` usa la dirección de mainnet
+  (`0x0422689cc4087b6B7280e0a7e7F655200ec86Ae1`, override con env `FACTORY`); la firma
+  `createERC20Wrapper(address,uint8,string,string)` es la canónica del protocolo. **Verificado.**
 - Bilingüe ES/EN con toggle. Solo para desarrollo (cuenta con clave pública de test).
