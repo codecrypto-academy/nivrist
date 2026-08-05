@@ -122,3 +122,8 @@ export async function getEuroXBalanceWei(provider: ethers.providers.Provider, ac
   const bal = await eurx.balanceOf({ account, providerOrSigner: provider });
   return bal; // ya viene como string decimal de wei
 }
+
+/** Balance realtime del super token (alias del enunciado). Devuelve wei como string. */
+export async function getRealtimeBalance(provider: ethers.providers.Provider, account: string): Promise<string> {
+  return getEuroXBalanceWei(provider, account);
+}
