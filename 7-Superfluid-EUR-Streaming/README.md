@@ -81,6 +81,11 @@ El flujo completo se probó sobre el protocolo Superfluid real (fork de mainnet,
 2000 EUR/mes (flowrate `771604938271604`) · el receptor recibió **2.777778 EURx en 1 h** (=
 `2000/(30·24)`, exacto) · deleteFlow (pausar) · downgrade EURx→EUR.
 
+**Evidencia con capturas** en [`docs/evidencia/`](docs/evidencia/): la web conectada al fork
+mostrando el balance EURx **subiendo en vivo** (3000 → 3002.89, net flow +2000 EUR/mes) y un
+**stream creado desde la UI** (destinatario activo a 2000 EUR/mes). / Screenshot evidence in
+`docs/evidencia/`.
+
 Los flows se pueden crear también por CLI con el **CFAv1Forwarder** de Superfluid
 (`0xcfA132E353cB4E398080B9700609bb008eceB125`):
 `createFlow(token, sender, receiver, flowrate, userData)` / `deleteFlow(...)` /
