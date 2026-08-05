@@ -10,8 +10,10 @@ import { OnboardInvestor } from "@/components/OnboardInvestor";
 import { IssueToken } from "@/components/IssueToken";
 import { CompliancePanel } from "@/components/CompliancePanel";
 import { TokenOps } from "@/components/TokenOps";
+import { Dividends } from "@/components/Dividends";
+import { Governance } from "@/components/Governance";
 
-type Tab = "overview" | "onboard" | "issue" | "compliance" | "ops";
+type Tab = "overview" | "onboard" | "issue" | "compliance" | "ops" | "dividends" | "governance";
 
 const TABS: { id: Tab; key: Parameters<ReturnType<typeof useT>["t"]>[0] }[] = [
   { id: "overview", key: "navOverview" },
@@ -19,6 +21,8 @@ const TABS: { id: Tab; key: Parameters<ReturnType<typeof useT>["t"]>[0] }[] = [
   { id: "issue", key: "navIssue" },
   { id: "compliance", key: "navCompliance" },
   { id: "ops", key: "navOps" },
+  { id: "dividends", key: "navDividends" },
+  { id: "governance", key: "navGovernance" },
 ];
 
 export default function Page() {
@@ -84,6 +88,8 @@ export default function Page() {
           {tab === "issue" && <IssueToken />}
           {tab === "compliance" && <CompliancePanel />}
           {tab === "ops" && <TokenOps />}
+          {tab === "dividends" && <Dividends />}
+          {tab === "governance" && <Governance />}
         </main>
 
         <footer className="mt-16 border-t border-ink-500/40 pt-6 text-center font-mono text-[11px] text-parchment-faint/60">

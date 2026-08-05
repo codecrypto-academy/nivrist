@@ -12,7 +12,11 @@ export interface Deployment {
   identityRegistry: Address;
   tokenCloneFactory: Address;
   compliancePresetManager: Address;
+  realEstateImpl: Address;
+  equityImpl: Address;
   demoToken: Address;
+  demoRealEstate: Address;
+  demoEquity: Address;
 }
 
 export const addresses = deployment as Deployment;

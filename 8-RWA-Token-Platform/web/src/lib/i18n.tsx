@@ -26,6 +26,8 @@ const DICT = {
   navIssue: { es: "Emitir token", en: "Issue token" },
   navCompliance: { es: "Compliance", en: "Compliance" },
   navOps: { es: "Operativa", en: "Operations" },
+  navDividends: { es: "Dividendos", en: "Dividends" },
+  navGovernance: { es: "Gobernanza", en: "Governance" },
 
   // wallet
   connect: { es: "Conectar", en: "Connect" },
@@ -79,6 +81,19 @@ const DICT = {
   issMaxHolders: { es: "Máx. holders", en: "Max holders" },
   issLockup: { es: "Lock-up (días)", en: "Lock-up (days)" },
   issZeroHint: { es: "0 = sin límite", en: "0 = no limit" },
+  issType: { es: "Tipo de token", en: "Token type" },
+  issType_base: {
+    es: "Security token ERC-3643 estándar.",
+    en: "Standard ERC-3643 security token.",
+  },
+  issType_realestate: {
+    es: "Inmobiliario: reparte rentas (dividendos en ETH) entre holders.",
+    en: "Real estate: distributes rent (ETH dividends) to holders.",
+  },
+  issType_equity: {
+    es: "Equity: gobernanza con voto ponderado por balance.",
+    en: "Equity: governance with balance-weighted voting.",
+  },
   issDeploy: { es: "Emitir token", en: "Issue token" },
   issDeployed: { es: "Token emitido", en: "Token issued" },
   issSelect: { es: "Seleccionar", en: "Select" },
@@ -123,6 +138,60 @@ const DICT = {
   opsPaused: { es: "En pausa", en: "Paused" },
   opsLive: { es: "Operativo", en: "Live" },
   opsSupply: { es: "Suministro", en: "Supply" },
+
+  // dividends (real estate)
+  divTitle: { es: "Dividendos (renta inmobiliaria)", en: "Dividends (real-estate rent)" },
+  divDesc: {
+    es: "El agente deposita la renta (ETH) y cada holder reclama su parte proporcional al balance.",
+    en: "The agent deposits rent (ETH) and each holder claims their share pro-rata to balance.",
+  },
+  divNoToken: {
+    es: "No hay tokens Real Estate. Emite uno en «Emitir token» (tipo Real Estate).",
+    en: "No Real Estate tokens. Issue one in “Issue token” (Real Estate type).",
+  },
+  divProperty: { es: "Referencia del inmueble", en: "Property reference" },
+  divPot: { es: "Repartido acumulado", en: "Distributed to date" },
+  divContractBal: { es: "ETH en el contrato", en: "ETH in contract" },
+  divDeposit: { es: "Depositar renta (ETH)", en: "Deposit rent (ETH)" },
+  divDepositBtn: { es: "Depositar", en: "Deposit" },
+  divWithdrawable: { es: "Reclamable de", en: "Withdrawable of" },
+  divClaim: { es: "Reclamar mis dividendos", en: "Claim my dividends" },
+  divClaimed: { es: "Dividendos reclamados", en: "Dividends claimed" },
+  divDeposited: { es: "Renta depositada", en: "Rent deposited" },
+  divHolder: { es: "Holder", en: "Holder" },
+  divBalance: { es: "Balance", en: "Balance" },
+  divClaimable: { es: "Reclamable", en: "Claimable" },
+
+  // governance (equity)
+  govTitle: { es: "Gobernanza (equity)", en: "Governance (equity)" },
+  govDesc: {
+    es: "El agente abre propuestas; los holders votan con peso igual a su balance.",
+    en: "The agent opens proposals; holders vote with weight equal to their balance.",
+  },
+  govNoToken: {
+    es: "No hay tokens Equity. Emite uno en «Emitir token» (tipo Equity).",
+    en: "No Equity tokens. Issue one in “Issue token” (Equity type).",
+  },
+  govNew: { es: "Nueva propuesta", en: "New proposal" },
+  govDescription: { es: "Descripción", en: "Description" },
+  govDuration: { es: "Duración (días)", en: "Duration (days)" },
+  govCreate: { es: "Crear propuesta", en: "Create proposal" },
+  govCreated: { es: "Propuesta creada", en: "Proposal created" },
+  govProposals: { es: "Propuestas", en: "Proposals" },
+  govNoProposals: { es: "Aún no hay propuestas", en: "No proposals yet" },
+  govFor: { es: "A favor", en: "For" },
+  govAgainst: { es: "En contra", en: "Against" },
+  govVoteFor: { es: "Votar a favor", en: "Vote for" },
+  govVoteAgainst: { es: "Votar en contra", en: "Vote against" },
+  govExecute: { es: "Ejecutar", en: "Execute" },
+  govVoted: { es: "Voto registrado", en: "Vote recorded" },
+  govExecuted: { es: "Propuesta ejecutada", en: "Proposal executed" },
+  govOpen: { es: "Abierta", en: "Open" },
+  govClosed: { es: "Cerrada", en: "Closed" },
+  govPassed: { es: "Aprobada", en: "Passed" },
+  govRejected: { es: "Rechazada", en: "Rejected" },
+  govEnds: { es: "Termina", en: "Ends" },
+  govYourWeight: { es: "Tu poder de voto", en: "Your voting power" },
 
   // shared
   address: { es: "Dirección", en: "Address" },

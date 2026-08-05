@@ -9,6 +9,8 @@ token issuance with compliance presets, a live compliance panel, and agent opera
 
 ![Overview](docs/evidencia/01-overview.jpg)
 ![Operations](docs/evidencia/02-operations-mint.jpg)
+![Dividends](docs/evidencia/03-dividends.jpg)
+![Governance](docs/evidencia/04-governance.jpg)
 
 ---
 
@@ -43,6 +45,12 @@ you point it at `localhost:8545`, chain `31337`.
 | **Issue token** | `createTokenWithCompliance` — clone + wire modules in one tx |
 | **Compliance** | Reads the selected token's aggregator and labels each active module |
 | **Operations** | mint / burn · freeze / pause · forced transfer · live balance lookup |
+| **Dividends** | Real-estate tokens: deposit rent (ETH), per-holder pro-rata table, claim |
+| **Governance** | Equity tokens: create proposals, balance-weighted voting, execute |
+
+The **Issue token** tab has a type selector (Base / Real Estate / Equity); Real Estate and
+Equity tokens unlock the Dividends and Governance tabs respectively. The demo deployment seeds
+one of each (TOWER with rent already deposited, ACMEEQ with an open proposal).
 
 ### Stack
 
@@ -82,6 +90,12 @@ cuenta para actuar como owner/agent (#0) o como el inversor verificado (#1). `Me
 | **Emitir token** | `createTokenWithCompliance` — clona + cablea módulos en una tx |
 | **Compliance** | Lee el aggregator del token seleccionado y etiqueta cada módulo activo |
 | **Operativa** | mint / burn · congelar / pausar · transferencia forzada · balance en vivo |
+| **Dividendos** | Tokens Real Estate: depositar renta (ETH), tabla por holder, reclamar |
+| **Gobernanza** | Tokens Equity: crear propuestas, voto ponderado por balance, ejecutar |
+
+La pestaña **Emitir token** tiene selector de tipo (Base / Real Estate / Equity); los tokens
+Real Estate y Equity habilitan las pestañas Dividendos y Gobernanza. El deploy demo siembra uno
+de cada uno (TOWER con renta ya depositada, ACMEEQ con una propuesta abierta).
 
 ### Notas
 

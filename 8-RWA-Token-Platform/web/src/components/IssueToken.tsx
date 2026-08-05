@@ -8,8 +8,14 @@ import { TokenCloneFactoryAbi, ComplianceAggregatorAbi } from "@/config/abis";
 import { useT } from "@/lib/i18n";
 import { useTx, errMsg } from "@/lib/useTx";
 import { parseAmount } from "@/lib/format";
-import { useTokens } from "@/lib/tokens";
+import { useTokens, type TokenKind } from "@/lib/tokens";
 import { Panel, Field, Button, Addr, useToast } from "./ui";
+
+const KINDS: { id: TokenKind; label: string }[] = [
+  { id: "base", label: "Base" },
+  { id: "realestate", label: "Real Estate" },
+  { id: "equity", label: "Equity" },
+];
 
 export function IssueToken() {
   const { t } = useT();
@@ -19,6 +25,7 @@ export function IssueToken() {
   const { show, node } = useToast();
   const { tokens, add, select, selected } = useTokens();
 
+  const [kind, setKind] = useState<TokenKind>("base");
   const [name, setName] = useState("Acme Real Estate");
   const [symbol, setSymbol] = useState("ACME");
   const [decimals, setDecimals] = useState("18");
@@ -26,15 +33,21 @@ export function IssueToken() {
   const [maxHolders, setMaxHolders] = useState("100");
   const [lockup, setLockup] = useState("0");
 
+  async function implFor(k: TokenKind): Promise<Address> {
+    if (k === "realestate") return addresses.realEstateImpl;
+    if (k === "equity") return addresses.equityImpl;
+    return (await publicClient!.readContract({
+      address: addresses.tokenCloneFactory,
+      abi: TokenCloneFactoryAbi,
+      functionName: "tokenImplementation",
+    })) as Address;
+  }
+
   async function issue() {
     if (!publicClient || !address) return;
     const dec = Number(decimals);
     try {
-      const impl = (await publicClient.readContract({
-        address: addresses.tokenCloneFactory,
-        abi: TokenCloneFactoryAbi,
-        functionName: "tokenImplementation",
-      })) as Address;
+      const impl = await implFor(kind);
 
       const mb = parseAmount(maxBalance || "0", dec) ?? 0n;
       const lockSeconds = BigInt(Number(lockup) * 86400);
@@ -60,7 +73,7 @@ export function IssueToken() {
         functionName: "moduleCount",
       })) as bigint;
 
-      add({ address: last.token, name, symbol, aggregator: last.aggregator, modules: Number(modules) });
+      add({ address: last.token, name, symbol, aggregator: last.aggregator, modules: Number(modules), kind });
       show(`${t("issDeployed")}: ${symbol}`);
     } catch (e) {
       show(errMsg(e), "err");
@@ -71,6 +84,33 @@ export function IssueToken() {
     <div className="grid gap-5 lg:grid-cols-[1.3fr_1fr]">
       <Panel index="03" title={t("issTitle")} subtitle={t("issDesc")}>
         {node}
+        <div className="mb-4">
+          <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-parchment-faint">
+            {t("issType")}
+          </span>
+          <div className="flex gap-1">
+            {KINDS.map((k) => (
+              <button
+                key={k.id}
+                onClick={() => setKind(k.id)}
+                className={`flex-1 border px-3 py-2 text-[12px] font-semibold uppercase tracking-wider transition-colors ${
+                  kind === k.id
+                    ? "border-gold bg-gold/10 text-gold"
+                    : "border-ink-500 text-parchment-faint hover:text-parchment-dim"
+                }`}
+              >
+                {k.label}
+              </button>
+            ))}
+          </div>
+          <p className="mt-1.5 text-[11.5px] text-parchment-faint/80">
+            {t(
+              ({ base: "issType_base", realestate: "issType_realestate", equity: "issType_equity" } as const)[
+                kind
+              ],
+            )}
+          </p>
+        </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label={t("issName")} value={name} onChange={(e) => setName(e.target.value)} />
           <Field label={t("issSymbol")} value={symbol} onChange={(e) => setSymbol(e.target.value)} />
@@ -119,6 +159,11 @@ export function IssueToken() {
                     <div className="flex items-baseline gap-2">
                       <span className="font-display text-[15px] text-parchment">{tok.symbol}</span>
                       <span className="truncate text-[12px] text-parchment-faint">{tok.name}</span>
+                      {tok.kind !== "base" && (
+                        <span className="shrink-0 border border-gold/40 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-gold/90">
+                          {tok.kind === "realestate" ? "RE" : "EQ"}
+                        </span>
+                      )}
                     </div>
                     <div className="mt-0.5 flex items-center gap-3">
                       <Addr value={tok.address} />
